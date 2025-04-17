@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MasalaYantra - Indian Cooking Assistant</title>
+    <style>
+        :root {
+            --primary: #FF8C42;
+            --primary-dark: #E67332;
+            --secondary: #FFF4E6;
+            --text: #333;
+            --light-bg: #FFF9F0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            height: 50px;
+            width: 50px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .tagline {
+            font-style: italic;
+            margin: 5px 0 0;
+            opacity: 0.9;
+        }
+        
+        #chat-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: 60vh;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #f0e6d2;
+        }
+        
+        .message-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .user-message {
+            background: #F0F7FF;
+            padding: 12px 16px;
+            border-radius: 18px 18px 0 18px;
+            margin-left: auto;
+            max-width: 70%;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .bot-message {
+            background: var(--secondary);
+            padding: 12px 16px;
+            border-radius: 18px 18px 18px 0;
+            max-width: 70%;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--primary);
+            border-radius: 24px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        #user-input:focus {
+            border-color: var(--primary-dark);
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .typing-dot {
+            height: 8px;
+            width: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1s infinite alternate;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .suggestions {
+            margin-top: 20px;
+        }
+        
+        .suggestion-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .suggestion-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .suggestion-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--primary);
+            border-radius: 16px;
+            color: var(--primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .suggestion-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .recipe-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .recipe-title {
+            color: var(--primary-dark);
+            margin-top: 0;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes bounce {
+            to { transform: translateY(-5px); }
+        }
+        
+        @media (max-width: 600px) {
+            .user-message, .bot-message {
+                max-width: 85%;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title-container">
+            <svg class="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="white"/>
+                <path d="M12 6C8 6 5 9 5 12H19C19 9 16 6 12 6Z" fill="#FF8C42"/>
+                <circle cx="9" cy="11" r="1" fill="white"/>
+                <circle cx="15" cy="11" r="1" fill="white"/>
+                <path d="M12 16C10 16 9 15 9 14H15C15 15 14 16 12 16Z" fill="#FF8C42"/>
+            </svg>
+            <div>
+                <h1>MasalaYantra</h1>
+                <p class="tagline">Your grandmotherly guide to Indian cooking</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="chat-container">
+        <div class="message-container">
+            <div class="bot-message">
+                Namaste! Welcome, my dear. Come, sit down and let's talk about food! What deliciousness are we creating today?
+            </div>
+        </div>
+    </div>
+    
+    <div class="input-container">
+        <input type="text" id="user-input" placeholder="Ask about chai, biryani, spices...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    
+    <div class="suggestions">
+        <div class="suggestion-title">Try asking:</div>
+        <div class="suggestion-buttons">
+            <button class="suggestion-btn" onclick="insertPrompt('Simple dal recipe')">Simple dal recipe</button>
+            <button class="suggestion-btn" onclick="insertPrompt('Difference between garam masala and curry powder')">Spice comparison</button>
+            <button class="suggestion-btn" onclick="insertPrompt('Vegetarian dinner ideas')">Dinner ideas</button>
+        </div>
+    </div>
+    
+    <div id="typing-indicator" style="display: none;">
+        <div class="message-container">
+            <div class="bot-message">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addMessage(sender, message) {
+            const chatContainer = document.getElementById("chat-container");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = "message-container";
+            
+            const contentDiv = document.createElement("div");
+            contentDiv.className = sender === "user" ? "user-message" : "bot-message";
+            
+            // Check if message contains recipe markers
+            if (message.includes("* ") || message.includes("**")) {
+                // Format as recipe card
+                const recipeCard = document.createElement("div");
+                recipeCard.className = "recipe-card";
+                
+                // Extract title if exists
+                const titleMatch = message.match(/(.*?):/);
+                if (titleMatch) {
+                    const title = document.createElement("h3");
+                    title.className = "recipe-title";
+                    title.textContent = titleMatch[1];
+                    recipeCard.appendChild(title);
+                    message = message.replace(titleMatch[0], "");
+                }
+                
+                // Add formatted content
+                const content = document.createElement("div");
+                content.innerHTML = message
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\* (.*?)(\n|$)/g, '<p>• $1</p>')
+                    .replace(/\n/g, '<br>');
+                recipeCard.appendChild(content);
+                contentDiv.appendChild(recipeCard);
+            } else {
+                contentDiv.textContent = message;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("user-input");
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage("user", message);
+                input.value = "";
+                
+                // Show typing indicator
+                document.getElementById("typing-indicator").style.display = "block";
+                
+                fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("typing-indicator").style.display = "none";
+                    addMessage("bot", data.response);
+                })
+                .catch(error => {
+                    document.getElementById("typing-indicator").style.display = "none";
+                    addMessage("bot", "Namaste! 🙏 I'm having trouble answering right now. Please try again later.");
+                });
+            }
+        }
+
+        function insertPrompt(prompt) {
+            document.getElementById("user-input").value = prompt;
+            document.getElementById("user-input").focus();
+        }
+
+        // Allow sending message with Enter key
+        document.getElementById("user-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
